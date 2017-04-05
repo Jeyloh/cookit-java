@@ -1,0 +1,16 @@
+{
+  "ingredients":[
+    {
+      "name":"Milk",
+      "category":"Dairy"
+    },
+    {
+      "name":"Flour",
+      "category":"Baking"
+    },
+    {
+      "name":"Egg",
+      "category":"Breakfast"
+    }
+  ]
+}
