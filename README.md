@@ -1,3 +1,0 @@
-# Cook IT
-
-JavaFX app 

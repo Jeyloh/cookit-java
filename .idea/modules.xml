@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CookIT.iml" filepath="$PROJECT_DIR$/CookIT.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CookIt2.iml" filepath="$PROJECT_DIR$/CookIt2.iml" />
     </modules>
   </component>
 </project>
