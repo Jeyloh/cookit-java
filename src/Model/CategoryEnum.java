@@ -1,4 +1,4 @@
-package Database;
+package Model;
 
 /**
  * Created by jlh94 on 05/04/2017.

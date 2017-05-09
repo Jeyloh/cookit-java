@@ -1,42 +1,46 @@
-import Database.ExampleStorage;
-import Database.Ingredient;
-import Database.Recipe;
+import Model.CategoryEnum;
+import Model.ExampleStorage;
+import Model.Ingredient;
+import Model.Recipe;
 import javafx.application.Application;
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 
 /**
  * Created by jlh94 on 24/04/2017.
  */
 
 public class Main extends Application {
-
     public static void main(String[] args) {
         launch(args);
     }
+
     private Recipe currentRecipe;
     private ExampleStorage ex;
-    private ObservableList<Ingredient> ingredientInputFieldList;
-    private ArrayList<Ingredient> currentRecipeIngredientsInput = new ArrayList<>();
+    private ArrayList<Ingredient> ingredientInputFieldList = new ArrayList<>();
+    private ListView creationList;
+    private GridPane grid = new GridPane();
 
+    /**
+     *
+     * @param primaryStage
+     */
     @Override
     public void start(Stage primaryStage) {
         ex = new ExampleStorage();
@@ -63,8 +67,10 @@ public class Main extends Application {
 
     }
 
-
-
+    /**
+     *
+     * @return
+     */
     public VBox addVBox() {
         VBox vbox = new VBox();
         vbox.setPadding(new Insets(10));
@@ -76,13 +82,14 @@ public class Main extends Application {
         ListView recipeListView = new ListView();
 
         for (Recipe recipe : ex.getRecipeList()) {
-            recipeListView.getItems().add(recipe.getName());
+            recipeListView.getItems().add(recipe);
         }
 
-        recipeListView.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) {
-                currentRecipe = (Recipe)recipeListView.getSelectionModel().getSelectedItem();
-            }
+        recipeListView.setOnMouseClicked((MouseEvent event) -> {
+            currentRecipe = (Recipe) recipeListView.getSelectionModel().getSelectedItem();
+            System.out.println(currentRecipe);
+            grid.getChildren().clear();
+            addGridPane();
         });
 
         vbox.getChildren().add(title);
@@ -91,41 +98,68 @@ public class Main extends Application {
         return vbox;
     }
 
+    /**
+     *
+     * @return
+     */
     public HBox addHBox() {
+        creationList = new ListView();
         HBox hbox = new HBox();
         hbox.setPadding(new Insets(15, 12, 15, 12));
         hbox.setSpacing(10);
-        hbox.setStyle("-fx-background-color: #336699;");
+        hbox.setStyle("-fx-background-color: #001a62;");
 
-        Button buttonCurrent = new Button("Current");
-        buttonCurrent.setPrefSize(100, 20);
+        // Left label in column 1 (bottom), row 3
+        Label label1 = new Label("New Ingredient:");
+        label1.setTextFill(Color.web("#fff"));
+        TextField textField1 = new TextField();
+        Button addIngredientBtn = new Button("Add Ingredient");
 
-        Button buttonProjected = new Button("Projected");
-        buttonProjected.setPrefSize(100, 20);
-        hbox.getChildren().addAll(buttonCurrent, buttonProjected);
+        // Add ingredient from Inputs
+        Ingredient addedIngredient = new Ingredient(
+                0,
+                textField1.getText(),
+                (String) createCategorybox().getValue(),
+                "desc here..."
+        );
+
+        addIngredientBtn.setOnMouseClicked(event ->
+                addCurrentIngredient(addedIngredient, textField1)
+        );
+        hbox.getChildren().addAll(label1, textField1, createCategorybox(), addIngredientBtn);
 
         return hbox;
     }
 
+    /**
+     *
+     * @param grid
+     * @param currentRecipe
+     */
+    private void renderCurrentRecipe(GridPane grid, Recipe currentRecipe) {
+        // Targeted recipe in column 3, row 3
+        Text recipeTitle = new Text("Index " + currentRecipe.getId() + ": " + currentRecipe.getName());
+        Text recipeDescription = new Text(currentRecipe.getDescription());
+
+        ListView<String> recipeList = new ListView<>();
+        for (Ingredient ing : currentRecipe.getIngredientList()) {
+            recipeList.getItems().add(ing.getTitle());
+        }
+        grid.add(recipeTitle, 4, 1);
+        grid.add(recipeDescription, 4, 2);
+        grid.add(recipeList, 4, 3);
+
+    }
+
+
+    /**
+     *
+     * @return
+     */
     public GridPane addGridPane() {
-        GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 10, 0, 20));
-
-        // Button for adding another Ingredient input section
-        Button addMoreIngredientFieldsBtn = new Button ("+");
-        addMoreIngredientFieldsBtn.setOnAction(actionEven -> {
-            System.out.println("User wants to add more ingredients, creating new field: ");
-            Label addedLabel = new Label("Ingredient Extra");
-            TextField addedTextField = new TextField ();
-            TextField addedCategoryField = new TextField ();
-            grid.add(addedLabel, 0, 6);
-            grid.add(addedTextField, 1, 6);
-            grid.add(addedCategoryField, 2, 6);
-
-        });
-        grid.add(addMoreIngredientFieldsBtn, 0, 0);
 
         // Category in column 2, row 1
         Text category = new Text("Add Recipe:");
@@ -137,103 +171,75 @@ public class Main extends Application {
         chartTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         grid.add(chartTitle, 4, 0);
 
-        // Targeted recipe in column 3, row 3
-        Text recipeTitle = new Text("Index: " + currentRecipe.getId() + ". " + currentRecipe.getName());
-        Text recipeDescription = new Text(currentRecipe.getDescription());
-
-        ListView<Ingredient> recipeList = new ListView<Ingredient>(currentRecipe.getIngredientList());
-        for (Ingredient ing : currentRecipe.getIngredientList()) {
-
-        }
-
-
-        grid.add(recipeTitle, 4, 2);
-        grid.add(recipeDescription, 4, 3);
-        grid.add(recipeList, 4, 4);
-
-        // Make an arraylist of ingredients in the MongoDB JSON
-        for (int i = 0; i < 1; i++) {
-            // TODO: This will currently only add one recipe as the names are not special ...
-            Text recipeIngredient = new Text("ing");
-            grid.add(recipeIngredient, 4, i);
-
-        }
+        renderCurrentRecipe(grid, currentRecipe);
 
         // Subtitle in columns 2-3, row 2
         Text chartSubtitle = new Text("Give your recipe a name and add ingredients to it.\n");
         grid.add(chartSubtitle, 1, 1, 2, 1);
 
-    //        // House icon in column 1, rows 1-2
-    //        ImageView imageHouse = new ImageView(
-    //                new Image(LayoutSample.class.getResourceAsStream("graphics/house.png")));
-    //        grid.add(imageHouse, 0, 0, 1, 2);
+        //        // House icon in column 1, rows 1-2
+        //        ImageView imageHouse = new ImageView(
+        //                new Image(LayoutSample.class.getResourceAsStream("graphics/house.png")));
+        //        grid.add(imageHouse, 0, 0, 1, 2);
 
 
         // Left label in column 1 (bottom), row 3
         Label recipeNameLabel = new Label("Recipe Name:");
-        TextField recipeNameField = new TextField ();
-        grid.add(recipeNameLabel, 0, 1);
-        grid.add(recipeNameField, 1, 1);
-
-        // Left label in column 1 (bottom), row 3
-        Label label1 = new Label("Ingredient 1:");
-        TextField textField1 = new TextField ();
-        TextField categoryField1 = new TextField ();
-        grid.add(label1, 0, 3);
-        grid.add(textField1, 1, 3);
-        grid.add(categoryField1, 2, 3);
-
-        // Left label in column 1 (bottom), row 3
-        Label label2 = new Label("Ingredient 1:");
-        TextField textField2 = new TextField ();
-        TextField categoryField2 = new TextField ();
-        grid.add(label2, 0, 4);
-        grid.add(textField2, 1, 4);
-        grid.add(categoryField2, 2, 4);
-
-        // Left label in column 1 (bottom), row 3
-        Label label3 = new Label("Ingredient 2:");
-        TextField textField3 = new TextField ();
-        TextField categoryField3 = new TextField ();
-        grid.add(label3, 0, 5);
-        grid.add(textField3, 1, 5);
-        grid.add(categoryField3, 2, 5);
+        TextField recipeNameField = new TextField();
+        grid.add(recipeNameLabel, 0, 2);
+        grid.add(recipeNameField, 1, 2);
+        recipeNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println("textfield changed from " + oldValue + " to " + newValue);
+        });
 
         Button addRecipeBtn = new Button("Add Recipe!");
 
+        addRecipeBtn.setOnMouseClicked((MouseEvent event) -> {
+            System.out.print("Test");
+            addInputAsRecipe(ex.getRecipeList().size() + 1, recipeNameField.getText(), "desc...");
 
-        // Create a new input list
-        for (int i = 0; i < ingredientInputFieldList.size(); i++) {
-            grid.add(new Label("Ingredient Name: "), i, 3+i);
-            TextField ingredientNameTf = new TextField();
-            grid.add(ingredientNameTf, i, 3+i);
-            TextField categoryTf = new TextField();
-            grid.add(categoryTf, i, 3+i);
-            final int ID = i;
+        });
 
-            currentRecipeIngredientsInput.add(new Ingredient(
-                    ex.getAllIngredients().size() + ID,
-                    ingredientNameTf.getText(),
-                    categoryTf.getText(),
-                    "desc here ...")
-            );
-            // Take the current ingredient inputs and add them (As ObservableList) to the currentRecipe
-            currentRecipe.setIngredientList((ObservableList)currentRecipeIngredientsInput);
-        }
-
-        grid.add(addRecipeBtn, 1, 5);
-
-    //        // Chart in columns 2-3, row 3
-    //        ImageView imageChart = new ImageView(
-    //                new Image(LayoutSample.class.getResourceAsStream("graphics/piechart.png")));
-    //        grid.add(imageChart, 1, 2, 2, 1);
-
-        // Right label in column 4 (top), row 3
-        Text servicesPercent = new Text("Services\n20%");
-        GridPane.setValignment(servicesPercent, VPos.TOP);
-        grid.add(servicesPercent, 3, 2);
-
-
+        creationList.setStyle("height: 200px");
+        addRecipeBtn.setStyle("width: 100%");
+        grid.add(addRecipeBtn, 1, 4);
+        grid.add(creationList, 1, 3);
         return grid;
+    }
+
+    /**
+     *
+     * @param ing
+     * @param title
+     */
+    private void addCurrentIngredient(Ingredient ing, TextField title) {
+        ingredientInputFieldList.add(ing);
+        creationList.getItems().add(title.getText());
+        ingredientInputFieldList.clear();
+        title.clear();
+    }
+
+    /**
+     *
+     * @return
+     */
+    private ChoiceBox createCategorybox() {
+        ChoiceBox categoryBox = new ChoiceBox(FXCollections.observableArrayList(
+                Arrays.asList(CategoryEnum.values())));
+        return categoryBox;
+    }
+
+    /**
+     *
+     * @param id
+     * @param name
+     * @param desc
+     */
+    private void addInputAsRecipe(int id, String name, String desc) {
+        System.out.println("Inside addInputAsRecipe");
+        ex.getRecipeList().add(new Recipe(id, name, ingredientInputFieldList, desc));
+        ex.getAllIngredients().addAll(ingredientInputFieldList);
+        grid.getChildren().clear();
+        addGridPane();
     }
 }

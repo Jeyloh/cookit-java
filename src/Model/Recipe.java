@@ -1,4 +1,4 @@
-package Database;
+package Model;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,6 +21,13 @@ public class Recipe {
 
     public Recipe() {};
 
+    /**
+     *
+     * @param _id
+     * @param _name
+     * @param _ingredientList
+     * @param _description
+     */
     public Recipe(int _id, String _name, ArrayList<Ingredient> _ingredientList, String _description) {
         this.id = _id;
         this.name = _name;
@@ -28,9 +35,13 @@ public class Recipe {
         this.ingredientList = _ingredientList;
         this.description = _description;
 
-
     }
 
+
+    /**
+     *
+     * @return
+     */
     public int getId() {
         return id;
     }
@@ -47,20 +58,12 @@ public class Recipe {
         this.name = name;
     }
 
-    public ArrayList<Ingredient> getIngredientListName() {
-        return ingredientList;
-    }
-
-    public void setIngredientListName(ArrayList<Ingredient> ingredientListName) {
-        this.ingredientList = ingredientListName;
-    }
-
     public ArrayList<Ingredient> getIngredientList() {
         return ingredientList;
     }
 
-    public ObservableList<Ingredient> getObservableList(ArrayList<Ingredient> arrayIngredientList) {
-        ObservableList<Ingredient> observableList = FXCollections.observableList(arrayIngredientList);
+    public ObservableList<Ingredient> getObservableList() {
+        ObservableList<Ingredient> observableList = FXCollections.observableList(ingredientList);
 
         return observableList;
     }
@@ -80,7 +83,7 @@ public class Recipe {
     @Override
     public String toString() {
         return String.format(
-                "Customer[id=%s, name='%s', ingredientList='%s', description='%s']",
+                "Recipe[id=%s, name='%s', ingredientList='%s', description='%s']",
                 id, name, ingredientList, description);
     }
 }

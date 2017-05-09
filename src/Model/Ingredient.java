@@ -1,4 +1,4 @@
-package Database;
+package Model;
 
 /**
  * Created by jlh94 on 24/04/2017.
@@ -54,7 +54,7 @@ public class Ingredient {
     @Override
     public String toString() {
         return String.format(
-                "Customer[id=%s, title='%s', category='%s', description='%s']",
+                "Ingredient[id=%s, title='%s', category='%s', description='%s']",
                 id, title, category, description);
     }
 }
